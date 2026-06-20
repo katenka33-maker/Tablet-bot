@@ -39,7 +39,9 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "https://openrouter.ai/api/v1/chat/completions",
             headers={
                 "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "HTTP-Referer": "https://github.com/diver-bot",
+                "X-Title": "Diver Bot"
             },
             json={
                 "model": "anthropic/claude-sonnet-4-5",
@@ -65,7 +67,15 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
     result = response.json()
-    answer = result["choices"][0]["message"]["content"]
+    print("OpenRouter response:", result)
+
+    if "choices" in result:
+        answer = result["choices"][0]["message"]["content"]
+    elif "error" in result:
+        answer = f"Ошибка API: {result['error'].get('message', str(result['error']))}"
+    else:
+        answer = f"Неожиданный ответ: {result}"
+
     await update.message.reply_text(answer)
 
 async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
